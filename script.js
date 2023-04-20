@@ -11,6 +11,8 @@ let operatorValue = null;
 let currentOperator = null;
 let result;
 let setEqual = false;
+let fromOperateEqualForOperand = false;
+let fromOperateEqualForOperator = false;
 let firstValueHolder;
 const operatorLibrary = {
   divide: "÷",
@@ -36,26 +38,36 @@ function updateInputScreen() {
     return;;
   }
   inputScreen.textContent = `${firstValue} ${operatorLibrary[operatorValue]} ${secondValue} =`;
+  firstValue = result;
   setEqual = false;
 }
 
 function updateOperator(event) {
   console.log(event.target.textContent);
+  if(fromOperateEqualForOperator) {
+    operatorValue = event.target.dataset.operator;
+    fromOperateEqualForOperator = false;
+  }
   if(!firstValue && firstValue !=0) setFirstValue();
   if(typeof firstValue === 'number' && operatorValue && currentOperand.length > 0){
     setSecondValue();
     result = operate(operatorValue, firstValue, secondValue);
     currentOperand = result;
+    currentOperator = event.target.dataset.operator;
     firstValueHolder = firstValue;
     firstValue = result;
-    if(event.target.dataset.operator === 'equals') {
+    if(currentOperator === 'equals') {
       setEqual = true;
+      fromOperateEqualForOperand = true;
+      fromOperateEqualForOperator = true;
       firstValue = firstValueHolder;
+      currentOperator = operatorValue;
     }
+    operatorValue = currentOperator;
     updateResultScreen();
     updateInputScreen();
     setOperandToBlank();
-    operatorValue = event.target.dataset.operator;
+    console.log(firstValue + ' ' +operatorValue+ ' '+secondValue);
     return;
   }
   operatorValue = event.target.dataset.operator;
@@ -63,7 +75,17 @@ function updateOperator(event) {
   currentOperand = "";
 }
 
+function setOperandToBlank(){
+  currentOperand = "";
+  secondValue = null;
+}
+
 function updateOperand(event) {
+  if(fromOperateEqualForOperand && fromOperateEqualForOperator) {
+    firstValue = null;
+    fromOperateEqualForOperand = false;
+  }
+  if(currentOperand.includes(".") && event.target.textContent == ".") return;
   currentOperand += event.target.textContent;
   updateResultScreen();
   console.log(currentOperand);
@@ -71,18 +93,13 @@ function updateOperand(event) {
 
 function setFirstValue() {
   if(!currentOperand) firstValue = 0;
-  else firstValue = parseInt(currentOperand);
+  else firstValue = parseFloat(currentOperand);
   currentOperand = "";
 }
 
 function setSecondValue() {
-  secondValue = parseInt(currentOperand);
+  secondValue = parseFloat(currentOperand);
   currentOperand = "";
-}
-
-function setOperandToBlank(){
-  currentOperand = "";
-  secondValue = null;
 }
 
 function add(operand) {
@@ -98,6 +115,10 @@ function multiply(operand) {
 }
 
 function divide(operand) {
+  if (operand[1] == 0) {
+    alert("World doesn't revolve around you! You can't divide anything by zero!");
+    return;
+  }
   return operand[0] / operand[1];
 }
 
