@@ -115,11 +115,25 @@ function multiply(operand) {
 }
 
 function divide(operand) {
+  let quotient = operand[0] / operand[1];
+  let result, float, index, newString;
   if (operand[1] == 0) {
-    alert("World doesn't revolve around you! You can't divide anything by zero!");
+    alert("The world doesn't revolve around you! You can't divide anything by zero!");
     return;
   }
-  return operand[0] / operand[1];
+  if(!(Number.isInteger(quotient))){
+    result = quotient.toString().split(".");
+    if(result[1].length > 2){
+      float = parseFloat(result[1]);
+      newString = float.toPrecision(2).toString().split("");
+      index = newString.indexOf(".");
+      if(index>0) newString.splice(index, 1).splice(2);
+      newString.splice(2);
+      result[1] = newString.join("");
+    }
+    return parseFloat(result.join("."));
+  }
+  return quotient;
 }
 
 function operate(operator, ...operand) {
