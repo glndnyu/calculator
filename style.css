@@ -1,18 +1,18 @@
 .calculator {
   display: flex;
   flex-direction: column;
-  border: 1px solid red;
-  background-color: rgb(53, 53, 53);
+  background-color: rgb(52, 52, 52);
   height: 600px;
   width: 400px;
   margin: auto;
+  border: 5px groove rgb(211, 255, 211);
 }
 
 .screen {
   height: 25%;
   margin: 20px;
   margin-bottom: 0;
-  background-color: black;
+  background-color: rgb(78, 88, 71);
   border-radius: 10px;
 }
 
@@ -47,8 +47,24 @@ button {
   border-radius: 10px;
   font-size: larger;
   flex: 1 1 auto;
+  background-color: rgb(43, 43, 43);
+  border: 1px groove gray;
+}
+
+button:hover {
+  background-color: rgb(95, 95, 95);
+  transition: 0.1s;
+}
+
+button:active {
+  background-color: rgb(173, 173, 173);
 }
 
 .clear, .delete {
   width: 40%;
+  background-color: rgb(164, 164, 164);
+}
+
+.operator, .equal-operator {
+  background-color: rgb(217, 171, 18);
 }
