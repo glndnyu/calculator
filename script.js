@@ -1,5 +1,6 @@
 const operand = document.querySelectorAll(".operand");
 const operator = document.querySelectorAll(".operator");
+const equal = document.querySelector(".equal-operator");
 const inputScreen = document.querySelector(".input-screen");
 const resultScreen = document.querySelector(".result-screen");
 const clearScreen = document.querySelector(".clear");
@@ -21,10 +22,8 @@ const operatorLibrary = {
   subtract: "-",
   equals: "="
 };
-
 operand.forEach(button => button.addEventListener("click", updateOperand));
 operator.forEach(button => button.addEventListener("click", updateOperator));
-
 clearScreen.addEventListener("click", clear);
 delChar.addEventListener("click", deleteCharacter);
 
@@ -43,12 +42,14 @@ function updateInputScreen() {
 }
 
 function updateOperator(event) {
-  console.log(event.target.textContent);
+  console.log(event.target.className);
   if(fromOperateEqualForOperator) {
     operatorValue = event.target.dataset.operator;
     fromOperateEqualForOperator = false;
   }
+  
   if(!firstValue && firstValue !=0) setFirstValue();
+  
   if(typeof firstValue === 'number' && operatorValue && currentOperand.length > 0){
     setSecondValue();
     result = operate(operatorValue, firstValue, secondValue);
@@ -62,6 +63,7 @@ function updateOperator(event) {
       fromOperateEqualForOperator = true;
       firstValue = firstValueHolder;
       currentOperator = operatorValue;
+      updateEqualListener();
     }
     operatorValue = currentOperator;
     updateResultScreen();
@@ -69,10 +71,18 @@ function updateOperator(event) {
     setOperandToBlank();
     console.log(firstValue + ' ' +operatorValue+ ' '+secondValue);
     return;
-  }
+  } 
   operatorValue = event.target.dataset.operator;
   updateInputScreen();
   currentOperand = "";
+}
+
+function updateEqualListener(){
+  if(fromOperateEqualForOperator) {
+    equal.removeEventListener("click", updateOperator);
+    return;
+  }
+  equal.addEventListener("click", updateOperator);
 }
 
 function setOperandToBlank(){
@@ -85,6 +95,7 @@ function updateOperand(event) {
     firstValue = null;
     fromOperateEqualForOperand = false;
   }
+  if(typeof firstValue === 'number' && operatorValue) updateEqualListener();
   if(currentOperand.includes(".") && event.target.textContent == ".") return;
   currentOperand += event.target.textContent;
   updateResultScreen();
