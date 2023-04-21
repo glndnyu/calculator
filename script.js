@@ -15,6 +15,7 @@ let setEqual = false;
 let fromOperateEqualForOperand = false;
 let fromOperateEqualForOperator = false;
 let firstValueHolder;
+let divideByZero = false;
 const operatorLibrary = {
   divide: "÷",
   multiply: "x",
@@ -24,14 +25,28 @@ const operatorLibrary = {
 };
 operand.forEach(button => button.addEventListener("click", updateOperand));
 operator.forEach(button => button.addEventListener("click", updateOperator));
+//window.addEventListener("keydown", checkKey);
 clearScreen.addEventListener("click", clear);
 delChar.addEventListener("click", deleteCharacter);
+
+/*function checkKey(event){
+  switch(true){
+    case typeof event.key === 'number':
+      console.log(event.key);
+      break;
+  }
+}*/
 
 function updateResultScreen() {
   resultScreen.textContent = currentOperand;
 }
 
 function updateInputScreen() {
+  if(divideByZero){
+    inputScreen.textContent = `${firstValue} ${operatorLibrary[operatorValue]} ${secondValue} = ERROR!`;
+    divideByZero = false;
+    return;  
+  }
   if(!setEqual)  {
     inputScreen.textContent = firstValue + ' ' + operatorLibrary[operatorValue];
     return;;
@@ -42,7 +57,6 @@ function updateInputScreen() {
 }
 
 function updateOperator(event) {
-  console.log(event.target.className);
   if(fromOperateEqualForOperator) {
     operatorValue = event.target.dataset.operator;
     fromOperateEqualForOperator = false;
@@ -53,6 +67,13 @@ function updateOperator(event) {
   if(typeof firstValue === 'number' && operatorValue && currentOperand.length > 0){
     setSecondValue();
     result = operate(operatorValue, firstValue, secondValue);
+    if(!result && result != 0) { 
+      currentOperand = "";
+      firstValue = null;
+      secondValue = null;
+      operatorValue = null;
+      return;
+    }
     currentOperand = result;
     currentOperator = event.target.dataset.operator;
     firstValueHolder = firstValue;
@@ -69,7 +90,6 @@ function updateOperator(event) {
     updateResultScreen();
     updateInputScreen();
     setOperandToBlank();
-    console.log(firstValue + ' ' +operatorValue+ ' '+secondValue);
     return;
   } 
   operatorValue = event.target.dataset.operator;
@@ -99,7 +119,6 @@ function updateOperand(event) {
   if(currentOperand.includes(".") && event.target.textContent == ".") return;
   currentOperand += event.target.textContent;
   updateResultScreen();
-  console.log(currentOperand);
 }
 
 function setFirstValue() {
@@ -130,6 +149,8 @@ function divide(operand) {
   let result, float, index, newString;
   if (operand[1] == 0) {
     alert("The world doesn't revolve around you! You can't divide anything by zero!");
+    divideByZero = true;
+    updateInputScreen();
     return;
   }
   if(!(Number.isInteger(quotient))){
