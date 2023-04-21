@@ -30,9 +30,17 @@ clearScreen.addEventListener("click", clear);
 delChar.addEventListener("click", deleteCharacter);
 
 function checkKey(event){
-  console.log(parseInt(event.key));
+  console.log(event.key);
   switch(true){
     case !(isNaN(parseInt(event.key))):
+    case event.key == '.':
+      console.log("here");
+      updateOperand(event);
+      break;
+    case event.key == '-':
+    case event.key == '+':
+    case event.key == '*':
+    case event.key == '/':
       console.log(event.key);
       break;
   }
@@ -68,14 +76,17 @@ function updateOperator(event) {
   if(typeof firstValue === 'number' && operatorValue && currentOperand.length > 0){
     setSecondValue();
     result = operate(operatorValue, firstValue, secondValue);
+
     if(!result && result != 0) { 
       clearValues();
       return;
     }
+
     currentOperand = result;
     currentOperator = event.target.dataset.operator;
     firstValueHolder = firstValue;
     firstValue = result;
+
     if(currentOperator === 'equals') {
       setEqual = true;
       fromOperateEqualForOperand = true;
@@ -84,12 +95,14 @@ function updateOperator(event) {
       currentOperator = operatorValue;
       updateEqualListener();
     }
+
     operatorValue = currentOperator;
     updateResultScreen();
     updateInputScreen();
     setOperandToBlank();
     return;
   } 
+
   operatorValue = event.target.dataset.operator;
   updateInputScreen();
   currentOperand = "";
@@ -100,6 +113,7 @@ function updateEqualListener(){
     equal.removeEventListener("click", updateOperator);
     return;
   }
+
   equal.addEventListener("click", updateOperator);
 }
 
@@ -109,13 +123,20 @@ function setOperandToBlank(){
 }
 
 function updateOperand(event) {
+  let valuePressed;
+  if(event.type === 'keydown') valuePressed = event.key;
+  else valuePressed = event.target.textContent;
+
   if(fromOperateEqualForOperand && fromOperateEqualForOperator) {
     firstValue = null;
     fromOperateEqualForOperand = false;
   }
+
   if(typeof firstValue === 'number' && operatorValue) updateEqualListener();
-  if(currentOperand.includes(".") && event.target.textContent == ".") return;
-  currentOperand += event.target.textContent;
+
+  if(currentOperand.includes(".") && valuePressed == '.') return;
+
+  currentOperand += valuePressed;
   updateResultScreen();
 }
 
@@ -131,26 +152,29 @@ function setSecondValue() {
 }
 
 function add(operand) {
-  return operand[0] + operand[1];
+  let sum = operand[0] + operand[1];
+  return checkDecimal(sum);
 }
 
 function subtract(operand) {
-  return operand[0] - operand[1];
+  let diff = operand[0] - operand[1];
+  return checkDecimal(diff);
 }
 
 function multiply(operand) {
-  return operand[0] * operand[1];
+  let prod = operand[0] * operand[1];
+  return checkDecimal(prod);
 }
 
 function divide(operand) {
   let quotient = operand[0] / operand[1];
-  return checkZeroDivisor(operand[1]) ? checkQuotient(quotient) : null;
+  return checkZeroDivisor(operand[1]) ? checkDecimal(quotient) : null;
 }
 
-function checkQuotient (quotient){
+function checkDecimal(value){
   let result, float, index, newString;
-  if(!(Number.isInteger(quotient))){
-    result = quotient.toString().split(".");
+  if(!(Number.isInteger(value))){
+    result = value.toString().split(".");
     if(result[1].length > 2){
       float = parseFloat(result[1]);
       newString = float.toPrecision(2).toString().split("");
@@ -161,7 +185,7 @@ function checkQuotient (quotient){
     }
     return parseFloat(result.join("."));
   }
-  return quotient;
+  return value;
 }
 
 function checkZeroDivisor(divisor) {
