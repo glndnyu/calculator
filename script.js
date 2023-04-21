@@ -25,17 +25,18 @@ const operatorLibrary = {
 };
 operand.forEach(button => button.addEventListener("click", updateOperand));
 operator.forEach(button => button.addEventListener("click", updateOperator));
-//window.addEventListener("keydown", checkKey);
+window.addEventListener("keydown", checkKey);
 clearScreen.addEventListener("click", clear);
 delChar.addEventListener("click", deleteCharacter);
 
-/*function checkKey(event){
+function checkKey(event){
+  console.log(parseInt(event.key));
   switch(true){
-    case typeof event.key === 'number':
+    case !(isNaN(parseInt(event.key))):
       console.log(event.key);
       break;
   }
-}*/
+}
 
 function updateResultScreen() {
   resultScreen.textContent = currentOperand;
@@ -49,7 +50,7 @@ function updateInputScreen() {
   }
   if(!setEqual)  {
     inputScreen.textContent = firstValue + ' ' + operatorLibrary[operatorValue];
-    return;;
+    return;
   }
   inputScreen.textContent = `${firstValue} ${operatorLibrary[operatorValue]} ${secondValue} =`;
   firstValue = result;
@@ -68,10 +69,7 @@ function updateOperator(event) {
     setSecondValue();
     result = operate(operatorValue, firstValue, secondValue);
     if(!result && result != 0) { 
-      currentOperand = "";
-      firstValue = null;
-      secondValue = null;
-      operatorValue = null;
+      clearValues();
       return;
     }
     currentOperand = result;
@@ -146,13 +144,11 @@ function multiply(operand) {
 
 function divide(operand) {
   let quotient = operand[0] / operand[1];
+  return checkZeroDivisor(operand[1]) ? checkQuotient(quotient) : null;
+}
+
+function checkQuotient (quotient){
   let result, float, index, newString;
-  if (operand[1] == 0) {
-    alert("The world doesn't revolve around you! You can't divide anything by zero!");
-    divideByZero = true;
-    updateInputScreen();
-    return;
-  }
   if(!(Number.isInteger(quotient))){
     result = quotient.toString().split(".");
     if(result[1].length > 2){
@@ -168,6 +164,15 @@ function divide(operand) {
   return quotient;
 }
 
+function checkZeroDivisor(divisor) {
+  if (divisor == 0) {
+    alert("The world doesn't revolve around you! You can't divide anything by zero!");
+    divideByZero = true;
+    updateInputScreen();
+    return false;
+  } return true;
+}
+
 function operate(operator, ...operand) {
   if(operator == "add") return add(operand);
   if(operator == "subtract") return subtract(operand);
@@ -178,6 +183,10 @@ function operate(operator, ...operand) {
 function clear() {
   inputScreen.textContent = "";
   resultScreen.textContent = "0";
+  clearValues();
+}
+
+function clearValues(){
   currentOperand = "";
   firstValue = null;
   secondValue = null;
