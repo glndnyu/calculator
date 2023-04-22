@@ -17,7 +17,7 @@ let fromOperateEqualForOperator = false;
 let firstValueHolder;
 let divideByZero = false;
 let secondValueNull = true;
-let fromOperate = false;
+let isEqualOn = false;
 const operatorLibrary = {
   divide: "÷",
   multiply: "x",
@@ -53,7 +53,6 @@ function checkKey(event){
       break;
     case event.key == '=':
     case event.key == 'Enter':
-      
       break;
     case event.key == 'Backspace':
       deleteCharacter();
@@ -110,7 +109,7 @@ function updateOperator(event) {
   if(typeof firstValue === 'number' && operatorValue && !secondValueNull){
     setSecondValue();
     result = operate(operatorValue, firstValue, secondValue);
-    fromOperate = true;
+    isEqualOn = false;
     
     if(!result && result != 0) { 
       clearValues();
@@ -129,7 +128,6 @@ function updateOperator(event) {
       firstValue = firstValueHolder;
       currentOperator = operatorValue;
     }
-    secondValueNull = true;
     operatorValue = currentOperator;
     updateEqualListener();
     updateResultScreen();
@@ -144,7 +142,7 @@ function updateOperator(event) {
 
 function updateEqualListener(){
   
-  if(fromOperate) {
+  if(!isEqualOn) {
     console.log("Bye bitches!");
     equal.removeEventListener("click", updateOperator);
     return;
@@ -156,11 +154,12 @@ function updateEqualListener(){
 function setOperandToBlank(){
   currentOperand = "0";
   secondValue = null;
+  secondValueNull = true;
 }
 
 function updateOperand(event) {
   let valuePressed = (event.type === 'keydown') ?  event.key : event.target.textContent;
-  fromOperate = false;
+  isEqualOn = true;
   if(fromOperateEqualForOperand && fromOperateEqualForOperator) {
     firstValue = null;
     fromOperateEqualForOperand = false;
@@ -261,4 +260,10 @@ function deleteCharacter() {
   newValue.splice(newValue.length - 1, 1);
   currentOperand = newValue.join("");
   updateResultScreen();
+
+  if(currentOperand == ""){
+    isEqualOn = false;
+    secondValueNull = true;
+    updateEqualListener();
+  }
 }
