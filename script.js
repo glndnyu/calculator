@@ -253,6 +253,8 @@ function clearValues(){
   firstValue = null;
   secondValue = null;
   operatorValue = null;
+  isEqualOn = false;
+  updateEqualListener();
 }
 
 function deleteCharacter() {
