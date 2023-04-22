@@ -7,7 +7,7 @@ const clearScreen = document.querySelector(".clear");
 const delChar = document.querySelector(".delete");
 let firstValue = null;
 let secondValue = null;
-let currentOperand = "";
+let currentOperand = "0";
 let operatorValue = null;
 let currentOperator = null;
 let result;
@@ -16,12 +16,22 @@ let fromOperateEqualForOperand = false;
 let fromOperateEqualForOperator = false;
 let firstValueHolder;
 let divideByZero = false;
+let secondValueNull = true;
+let fromOperate = false;
 const operatorLibrary = {
   divide: "÷",
   multiply: "x",
   add: "+",
   subtract: "-",
   equals: "="
+};
+const operatorTerm = {
+  "*": "multiply",
+  "-": "subtract",
+  "/": "divide",
+  "+": "add",
+  "Enter": "equals",
+  "=": "equals"
 };
 operand.forEach(button => button.addEventListener("click", updateOperand));
 operator.forEach(button => button.addEventListener("click", updateOperator));
@@ -30,23 +40,36 @@ clearScreen.addEventListener("click", clear);
 delChar.addEventListener("click", deleteCharacter);
 
 function checkKey(event){
-  console.log(event.key);
   switch(true){
     case !(isNaN(parseInt(event.key))):
     case event.key == '.':
-      console.log("here");
       updateOperand(event);
       break;
     case event.key == '-':
     case event.key == '+':
     case event.key == '*':
     case event.key == '/':
-      console.log(event.key);
+      updateOperator(event);
+      break;
+    case event.key == '=':
+    case event.key == 'Enter':
+      
+      break;
+    case event.key == 'Backspace':
+      deleteCharacter();
+      break;
+    case event.key == 'Escape':
+      clear();
       break;
   }
 }
 
 function updateResultScreen() {
+  if(typeof currentOperand == 'string'){
+    let firstChar = currentOperand.split("");
+    if(firstChar[0] == "0") firstChar.splice(0,1);
+    currentOperand = firstChar.join("");
+  }
   resultScreen.textContent = currentOperand;
 }
 
@@ -65,25 +88,37 @@ function updateInputScreen() {
   setEqual = false;
 }
 
+function getOperatorTerm(event) {
+  const key = Object.keys(operatorTerm);
+  const values = Object.values(operatorTerm);
+  
+  let index = key.indexOf(event.key);
+  
+  return values[index];
+}
+
 function updateOperator(event) {
+  let operatorPressed = (event.type === 'keydown') ? getOperatorTerm(event) : event.target.dataset.operator;
+  
   if(fromOperateEqualForOperator) {
-    operatorValue = event.target.dataset.operator;
+    operatorValue = operatorPressed;
     fromOperateEqualForOperator = false;
   }
   
   if(!firstValue && firstValue !=0) setFirstValue();
   
-  if(typeof firstValue === 'number' && operatorValue && currentOperand.length > 0){
+  if(typeof firstValue === 'number' && operatorValue && !secondValueNull){
     setSecondValue();
     result = operate(operatorValue, firstValue, secondValue);
-
+    fromOperate = true;
+    
     if(!result && result != 0) { 
       clearValues();
       return;
     }
 
     currentOperand = result;
-    currentOperator = event.target.dataset.operator;
+    currentOperator = operatorPressed;
     firstValueHolder = firstValue;
     firstValue = result;
 
@@ -93,62 +128,66 @@ function updateOperator(event) {
       fromOperateEqualForOperator = true;
       firstValue = firstValueHolder;
       currentOperator = operatorValue;
-      updateEqualListener();
     }
-
+    secondValueNull = true;
     operatorValue = currentOperator;
+    updateEqualListener();
     updateResultScreen();
     updateInputScreen();
     setOperandToBlank();
     return;
   } 
-
-  operatorValue = event.target.dataset.operator;
+  operatorValue = operatorPressed;
   updateInputScreen();
-  currentOperand = "";
+  currentOperand = "0";
 }
 
 function updateEqualListener(){
-  if(fromOperateEqualForOperator) {
+  
+  if(fromOperate) {
+    console.log("Bye bitches!");
     equal.removeEventListener("click", updateOperator);
     return;
   }
-
+  console.log("Hello bitches!");
   equal.addEventListener("click", updateOperator);
 }
 
 function setOperandToBlank(){
-  currentOperand = "";
+  currentOperand = "0";
   secondValue = null;
 }
 
 function updateOperand(event) {
-  let valuePressed;
-  if(event.type === 'keydown') valuePressed = event.key;
-  else valuePressed = event.target.textContent;
-
+  let valuePressed = (event.type === 'keydown') ?  event.key : event.target.textContent;
+  fromOperate = false;
   if(fromOperateEqualForOperand && fromOperateEqualForOperator) {
     firstValue = null;
     fromOperateEqualForOperand = false;
   }
 
-  if(typeof firstValue === 'number' && operatorValue) updateEqualListener();
+  if(typeof firstValue === 'number' && operatorValue) {
+    console.log("Here");
+    secondValueNull = false;
+    updateEqualListener();
+  }
 
   if(currentOperand.includes(".") && valuePressed == '.') return;
 
   currentOperand += valuePressed;
   updateResultScreen();
+  
 }
 
 function setFirstValue() {
   if(!currentOperand) firstValue = 0;
   else firstValue = parseFloat(currentOperand);
-  currentOperand = "";
+  currentOperand = "0";
 }
 
 function setSecondValue() {
   secondValue = parseFloat(currentOperand);
-  currentOperand = "";
+  currentOperand = "0";
 }
 
 function add(operand) {
@@ -211,7 +250,7 @@ function clear() {
 }
 
 function clearValues(){
-  currentOperand = "";
+  currentOperand = "0";
   firstValue = null;
   secondValue = null;
   operatorValue = null;
