@@ -40,6 +40,7 @@ clearScreen.addEventListener("click", clear);
 delChar.addEventListener("click", deleteCharacter);
 
 function checkKey(event){
+  event.preventDefault();
   switch(true){
     case !(isNaN(parseInt(event.key))):
     case event.key == '.':
@@ -53,6 +54,7 @@ function checkKey(event){
       break;
     case event.key == '=':
     case event.key == 'Enter':
+      if(typeof firstValue === 'number' && operatorValue && !secondValueNull) updateOperator(event);
       break;
     case event.key == 'Backspace':
       deleteCharacter();
@@ -61,6 +63,7 @@ function checkKey(event){
       clear();
       break;
   }
+  console.log(currentOperand, currentOperand.length);
 }
 
 function updateResultScreen() {
@@ -93,6 +96,8 @@ function getOperatorTerm(event) {
   
   let index = key.indexOf(event.key);
   
+  console.log(values[index]);
+
   return values[index];
 }
 
@@ -141,14 +146,8 @@ function updateOperator(event) {
 }
 
 function updateEqualListener(){
-  
-  if(!isEqualOn) {
-    console.log("Bye bitches!");
-    equal.removeEventListener("click", updateOperator);
-    return;
-  }
-  console.log("Hello bitches!");
-  equal.addEventListener("click", updateOperator);
+  if(!isEqualOn) equal.removeEventListener("click", updateOperator);
+  else equal.addEventListener("click", updateOperator);
 }
 
 function setOperandToBlank(){
@@ -166,7 +165,6 @@ function updateOperand(event) {
   }
 
   if(typeof firstValue === 'number' && operatorValue) {
-    console.log("Here");
     secondValueNull = false;
     updateEqualListener();
   }
@@ -180,13 +178,17 @@ function updateOperand(event) {
 
 function setFirstValue() {
   if(!currentOperand) firstValue = 0;
-  else firstValue = parseFloat(currentOperand);
+  else firstValue = checkOperand();
   currentOperand = "0";
 }
 
 function setSecondValue() {
-  secondValue = parseFloat(currentOperand);
+  secondValue = checkOperand();
   currentOperand = "0";
+}
+
+function checkOperand() {
+  return (currentOperand == ".") ? 0 : parseFloat(currentOperand);
 }
 
 function add(operand) {
